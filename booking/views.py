@@ -25,7 +25,7 @@ def table(request):
                if rt in request.POST:
                     book_dic[rt]=request.POST[rt]
                     book_ls.append(rt)
-          booking_sum = models.Room_types.objects.raw('select * from booking_room_types where rt_id in %s',params=[book_ls])          
+          booking_sum = models.Room_types.objects.raw('select * from booking_room_types where rt_id in (%s)', params=[book_ls])          
           
           if 'inday' in request.POST:
                inday = request.POST['inday']
@@ -230,36 +230,37 @@ def payment(request):
      book_ls = {}
      booking = []
      total = 0
-     if request.method == 'POST':
-          
-          if 'inday' in request.POST:
-               inday = request.POST['inday']
-               if inday is None or inday == '':
-                    inday = '2013-01-01'
+     global a
+     global b
+
+     if 'inday' in request.POST:
+          inday = request.POST['inday']
+          if inday is None or inday == '':
+              inday = '2013-01-01'
           else:
-               inday = '2013-01-01'
+               inday  = '2013-01-01'
           
-          if 'outday' in request.POST:
-               outday = request.POST['outday']
-               if outday is None or outday == '':
-                    outday = '2013-01-02'
-          else:
-               outday = '2013-01-02'
+     if 'outday' in request.POST:
+           outday = request.POST['outday']
+           if outday is None or outday == '':
+                outday = '2013-01-02'
+           else:
+               outday  = '2013-01-02'
           
-          for rt in rt_ls:
-               if rt in request.POST:
-                    book_ls[rt] = request.POST[rt].replace(u'\xa0', u' ')
-                    if '0' in book_ls[rt]:
-                         pass
-                    elif '0' not in book_ls[rt]:
-                         booking.append(rt)
-          if not booking: 
-               return render(request, 'index.html',locals())
-          else:
-               booking_sum = models.Room_types.objects.raw('select * from booking_room_types where rt_id in %s',params=[booking])
-               
-     a = datetime.strptime(inday,date_format)
-     b = datetime.strptime(outday,date_format)
+     for rt in rt_ls:
+         if rt in request.POST:
+            book_ls[rt] = request.POST[rt].replace(u'\xa0', u' ')
+            if '0' in book_ls[rt]:
+                pass
+            elif '0' not in book_ls[rt]:
+                booking.append(rt)
+     if not booking: 
+        return render(request, 'payment.html',locals())
+     else:
+        booking_sum = models.Room_types.objects.raw('select * from booking_room_types where rt_id in (%s)', params=[booking])
+    
+     a = datetime.strptime(a, date_format)
+     b = datetime.strptime(b, date_format)
      delta = b-a
      no_day =  delta.days
      for rm in booking_sum:
